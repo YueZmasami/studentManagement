@@ -66,7 +66,8 @@
 <body>
 <h2>Add Course</h2>
 <form action="addCourse" method="post">
-
+    <%--        if course exists, in this page, there will be an alert --%>
+    <input type="hidden" name="errorMsg" value="<%= request.getAttribute("errorMsg") %>">
     <table>
         <tr>
             <td>Coursename:</td>
@@ -81,5 +82,11 @@
         </tr>
     </table>
 </form>
+<% String errorMsg = (String) request.getAttribute("errorMsg"); %>
+<% if (errorMsg != null && !errorMsg.isEmpty()) { %>
+<script>
+    alert("<%= errorMsg %>");
+</script>
+<% } %>
 </body>
 </html>

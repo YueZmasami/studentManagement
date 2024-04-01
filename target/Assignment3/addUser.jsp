@@ -74,12 +74,16 @@
     </style>
 
 </head>
+
 <body>
+
+
 
 <div  class="container" >
     <h2>Add User</h2>
     <form action="addUser" method="post">
-
+<%--        if user exists, in this page, there will be an alert --%>
+        <input type="hidden" name="errorMsg" value="<%= request.getAttribute("errorMsg") %>">
         <table>
 
             <tr>
@@ -117,6 +121,14 @@
         </table>
     </form>
 </div>
+
+<% String errorMsg = (String) request.getAttribute("errorMsg"); %>
+<% if (errorMsg != null && !errorMsg.isEmpty()) { %>
+<script>
+    alert("<%= errorMsg %>");
+</script>
+<% } %>
+
 </body>
 </html>
 

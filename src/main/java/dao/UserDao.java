@@ -3,6 +3,7 @@ package dao;
 import entity.User;
 
 import java.sql.*;
+import Exception.UserExistException;
 
 /**
  * @author: yue
@@ -34,19 +35,31 @@ public class UserDao {
         closeConnection();
         return user;
     }
-    // add new user
+    // add new user; if user is already in the db(whose firstname, lastname and phone number are the same), alert informing admin that user exist; password is default
 public void createNewUser(String Username, String Password, String FirstName, String LastName, String Phone, String Role) throws Exception{
     initConnection();
-    String sql = "INSERT INTO User_Table (Username, Password, FirstName, LastName, Phone, Role) VALUES (?,?,?,?,?,?)";
-    try (PreparedStatement statement = conn.prepareStatement(sql)) {
-        statement.setString(1, Username);
-        statement.setString(2, Password);
-        statement.setString(3, FirstName);
-        statement.setString(4, LastName);
-        statement.setString(5, Phone);
-        statement.setString(6, Role);
-        statement.executeUpdate();
+    String checkSql="select * from User_Table where FirstName=? and LastName=? and Phone=? ";
+    PreparedStatement checkStatement = conn.prepareStatement(checkSql);
+    checkStatement.setString(1,FirstName );
+    checkStatement.setString(2,LastName );
+    checkStatement.setString(3,Phone);
+    ResultSet checkSet = checkStatement.executeQuery();
+    if(checkSet.next()){
+        throw new UserExistException(" user exist!");
+
+    }else {
+        String sql = "INSERT INTO User_Table (Username, Password, FirstName, LastName, Phone, Role) VALUES (?,?,?,?,?,?)";
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
+            statement.setString(1, Username);
+            statement.setString(2, Password);
+            statement.setString(3, FirstName);
+            statement.setString(4, LastName);
+            statement.setString(5, Phone);
+            statement.setString(6, Role);
+            statement.executeUpdate();
+        }
     }
+
     closeConnection();
 }
 

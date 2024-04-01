@@ -6,6 +6,7 @@ import entity.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import Exception.CourseExistException;
 
 /**
  * @author: yue
@@ -16,15 +17,30 @@ import java.util.List;
 public class CourseDao {
     private Connection conn = null;
 
-// enroll course for student or teacher according to userid and courseid
+// enroll course for student or teacher according to userid and courseid; if they had enrolled the specific course, then update in db
     public void  enrollCourse4User(int UserID, int CourseID) throws Exception {
         initConnection();
-        String sql = "INSERT INTO User_Course_Table (UserID, CourseID) VALUES (?, ?)";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setInt(1, UserID);
-            statement.setInt(2, CourseID);
-            statement.executeUpdate();
+        String checkSql="select * from User_Course_Table where UserID=? and CourseID=? ";
+        PreparedStatement statement = conn.prepareStatement(checkSql);
+        statement.setInt(1, UserID);
+        statement.setInt(2, CourseID);
+        ResultSet checkSet = statement.executeQuery();
+        if(checkSet.next()){
+            String updateSql="update User_Course_Table set CourseID=? where UserID=? ";
+            PreparedStatement updateStatement = conn.prepareStatement(updateSql);
+            updateStatement.setInt(1, CourseID);
+            updateStatement.setInt(2, UserID);
+            updateStatement.executeUpdate();
+        }else {
+            String sql = "INSERT INTO User_Course_Table (UserID, CourseID) VALUES (?, ?)";
+            try (PreparedStatement insertStatement = conn.prepareStatement(sql)) {
+                insertStatement.setInt(1, UserID);
+                insertStatement.setInt(2, CourseID);
+                insertStatement.executeUpdate();
+            }
         }
+
+        closeConnection();
     }
 // get courses according to id return a list of course
     public List<Course> getCourses4User(int UserID) throws Exception {
@@ -87,15 +103,24 @@ public List<User> getStudentsByCourseId(int CourseId)  throws Exception{
     }
     return students;
 }
-//create a course
+//create a course, if course exists which means there is the same course name in db, alert; else insert new course
     public void createCourse(String CourseName, String Semester) throws Exception{
         initConnection();
-        String sql="INSERT INTO Course_Table (CourseName, Semester) VALUES (?,?)";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, CourseName);
-            statement.setString(2, Semester);
-            statement.executeUpdate();
+        String checkSql ="select * from Course_Table where CourseName=? ";
+        PreparedStatement checkStatement = conn.prepareStatement(checkSql);
+        checkStatement.setString(1, CourseName);
+        ResultSet checkSet = checkStatement.executeQuery();
+        if(checkSet.next()){
+            throw new CourseExistException(" course exist!");
+        }else {
+            String sql="INSERT INTO Course_Table (CourseName, Semester) VALUES (?,?)";
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                statement.setString(1, CourseName);
+                statement.setString(2, Semester);
+                statement.executeUpdate();
+            }
         }
+
         closeConnection();
     }
     private void initConnection() throws Exception {

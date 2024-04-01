@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import Exception.UserExistException;
+import java.io.IOException;
 
 /**
  * @author: yue
@@ -19,7 +21,7 @@ import java.io.PrintWriter;
 public class addUser extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException  {
         PrintWriter out = resp.getWriter();
         UserDao userDao=new UserDao();
         // get parameters from form in addUser.jsp
@@ -32,11 +34,15 @@ public class addUser extends HttpServlet {
         try {
             // create a new user by calling method
             userDao.createNewUser(Username, Password,FirstName,LastName,Phone,Role);
-            // go back to admin_dashboard
             resp.sendRedirect("admin_dashboard.jsp");
         } catch (Exception e) {
             e.printStackTrace();
+            req.setAttribute("errorMsg", "user exist");
+            req.getRequestDispatcher("addUser.jsp").forward(req, resp);
         }
+
+
+
     }
 
     @Override

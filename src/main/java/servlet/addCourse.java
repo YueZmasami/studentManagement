@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import Exception.CourseExistException;
 
 /**
  * @author: yue
@@ -29,6 +30,8 @@ public class addCourse  extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
+            req.setAttribute("errorMsg", "course exist");
+            req.getRequestDispatcher("addCourse.jsp").forward(req, resp);
         }
     }
 
